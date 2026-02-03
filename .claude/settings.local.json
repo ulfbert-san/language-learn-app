@@ -1,0 +1,17 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(where:*)",
+      "Bash(dir:*)",
+      "Bash(cmd /c \"dir C:\\Users\\Marcel.Lachmann\\AppData\\Local\\Android /b 2>nul\")",
+      "Bash(cmd /c \"dir \"\"C:\\Program Files\\dotnet\\packs\"\" /b 2>nul | findstr -i android\")",
+      "Bash(powershell -Command:*)",
+      "Bash(cat:*)",
+      "Bash(find:*)",
+      "WebSearch",
+      "WebFetch(domain:quashbugs.com)",
+      "Bash(flutter pub:*)",
+      "Bash(cmd /c \"cd /d C:\\Users\\Marcel.Lachmann\\Repos\\language-learn-app\\language_learn_app && flutter pub get\")"
+    ]
+  }
+}
