@@ -16,7 +16,25 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
 
   @override
-  int get schemaVersion => 1;
+  int get schemaVersion => 3;
+
+  @override
+  MigrationStrategy get migration => MigrationStrategy(
+        onCreate: (Migrator m) async {
+          await m.createAll();
+        },
+        onUpgrade: (Migrator m, int from, int to) async {
+          if (from < 2) {
+            // Add Spaced Repetition columns
+            await m.addColumn(flashcards, flashcards.boxLevel);
+            await m.addColumn(flashcards, flashcards.nextReview);
+          }
+          if (from < 3) {
+            // Add language column to LernSets
+            await m.addColumn(lernSets, lernSets.language);
+          }
+        },
+      );
 
   // Folder operations
   Future<List<Folder>> getAllFolders() => select(folders).get();
@@ -109,6 +127,41 @@ class AppDatabase extends _$AppDatabase {
       ..where(flashcards.lernSetId.equals(lernSetId));
     final result = await query.getSingle();
     return result.read(count) ?? 0;
+  }
+
+  // Spaced Repetition operations
+  Future<List<Flashcard>> getFlashcardsDueForReview(int lernSetId) async {
+    final now = DateTime.now();
+    return (select(flashcards)
+          ..where((f) => f.lernSetId.equals(lernSetId))
+          ..where((f) => f.nextReview.isNull() | f.nextReview.isSmallerOrEqualValue(now))
+          ..orderBy([
+            (f) => OrderingTerm.asc(f.boxLevel),
+            (f) => OrderingTerm.asc(f.nextReview),
+          ]))
+        .get();
+  }
+
+  Future<void> updateFlashcardBoxLevel(int cardId, int boxLevel, DateTime? nextReview) async {
+    await (update(flashcards)..where((f) => f.id.equals(cardId))).write(
+      FlashcardsCompanion(
+        boxLevel: Value(boxLevel),
+        nextReview: Value(nextReview),
+      ),
+    );
+  }
+
+  Future<Map<int, int>> getBoxLevelCounts(int lernSetId) async {
+    final result = <int, int>{};
+    for (int i = 1; i <= 5; i++) {
+      final count = flashcards.id.count();
+      final query = selectOnly(flashcards)
+        ..addColumns([count])
+        ..where(flashcards.lernSetId.equals(lernSetId) & flashcards.boxLevel.equals(i));
+      final row = await query.getSingle();
+      result[i] = row.read(count) ?? 0;
+    }
+    return result;
   }
 }
 

@@ -153,46 +153,23 @@ class _StudyPageState extends ConsumerState<StudyPage> {
                 ),
               ),
               const SizedBox(height: 24),
-              // Card counter
+              // Counter centered with control icons on the right
               Row(
-                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  IconButton(
-                    icon: const Icon(Icons.chevron_left),
-                    onPressed: state.currentIndex > 0
-                        ? () {
-                            ref
-                                .read(studySessionProvider(widget.lernSetId)
-                                    .notifier)
-                                .previousCard();
-                          }
-                        : null,
-                  ),
-                  Text(
-                    '${state.currentPosition} / ${state.totalCards}',
-                    style: Theme.of(context).textTheme.titleLarge,
+                  // Spacer to balance the buttons on the right
+                  const SizedBox(width: 96),
+                  Expanded(
+                    child: Center(
+                      child: Text(
+                        '${state.currentPosition} / ${state.totalCards}',
+                        style: Theme.of(context).textTheme.titleMedium,
+                      ),
+                    ),
                   ),
                   IconButton(
-                    icon: const Icon(Icons.chevron_right),
                     onPressed: () {
                       ref
-                          .read(
-                              studySessionProvider(widget.lernSetId).notifier)
-                          .nextCard();
-                    },
-                  ),
-                ],
-              ),
-              const SizedBox(height: 16),
-              // Control buttons
-              Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  OutlinedButton.icon(
-                    onPressed: () {
-                      ref
-                          .read(
-                              studySessionProvider(widget.lernSetId).notifier)
+                          .read(studySessionProvider(widget.lernSetId).notifier)
                           .toggleSwap();
                     },
                     icon: Icon(
@@ -201,37 +178,145 @@ class _StudyPageState extends ConsumerState<StudyPage> {
                           ? Theme.of(context).colorScheme.primary
                           : null,
                     ),
-                    label: Text(
-                      'Vertauschen',
-                      style: TextStyle(
-                        color: state.isSwapped
-                            ? Theme.of(context).colorScheme.primary
-                            : null,
-                      ),
-                    ),
+                    tooltip: 'Vertauschen',
                   ),
-                  const SizedBox(width: 12),
-                  OutlinedButton.icon(
+                  IconButton(
                     onPressed: () {
                       ref
-                          .read(
-                              studySessionProvider(widget.lernSetId).notifier)
+                          .read(studySessionProvider(widget.lernSetId).notifier)
                           .shuffleRemaining();
                     },
                     icon: const Icon(Icons.shuffle),
-                    label: const Text('Mischen'),
+                    tooltip: 'Mischen',
                   ),
                 ],
               ),
               const SizedBox(height: 16),
-              // Hint text
+              const Divider(),
+              const SizedBox(height: 16),
+              // Learning modes grid
+              GridView.count(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                crossAxisCount: 2,
+                mainAxisSpacing: 12,
+                crossAxisSpacing: 12,
+                childAspectRatio: 1.5,
+                children: [
+                  _LearningModeCard(
+                    icon: Icons.quiz,
+                    label: 'Multiple Choice',
+                    onTap: () {
+                      context.pushNamed(
+                        'multipleChoice',
+                        pathParameters: {
+                          'lernSetId': widget.lernSetId.toString()
+                        },
+                      );
+                    },
+                  ),
+                  _LearningModeCard(
+                    icon: Icons.keyboard,
+                    label: 'Schreiben',
+                    onTap: () {
+                      context.pushNamed(
+                        'typing',
+                        pathParameters: {
+                          'lernSetId': widget.lernSetId.toString()
+                        },
+                      );
+                    },
+                  ),
+                  _LearningModeCard(
+                    icon: Icons.link,
+                    label: 'Zuordnung',
+                    onTap: () {
+                      context.pushNamed(
+                        'matching',
+                        pathParameters: {
+                          'lernSetId': widget.lernSetId.toString()
+                        },
+                      );
+                    },
+                  ),
+                  _LearningModeCard(
+                    icon: Icons.inventory_2,
+                    label: 'Leitner',
+                    onTap: () {
+                      context.pushNamed(
+                        'spacedRepetition',
+                        pathParameters: {
+                          'lernSetId': widget.lernSetId.toString()
+                        },
+                      );
+                    },
+                  ),
+                  _LearningModeCard(
+                    icon: Icons.extension,
+                    label: 'Wortbau',
+                    onTap: () {
+                      context.pushNamed(
+                        'buildTheWord',
+                        pathParameters: {
+                          'lernSetId': widget.lernSetId.toString()
+                        },
+                      );
+                    },
+                  ),
+                  _LearningModeCard(
+                    icon: Icons.grid_4x4,
+                    label: 'Vokabel Tetris',
+                    onTap: () {
+                      context.pushNamed(
+                        'vocabTetris',
+                        pathParameters: {
+                          'lernSetId': widget.lernSetId.toString()
+                        },
+                      );
+                    },
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _LearningModeCard extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final VoidCallback onTap;
+
+  const _LearningModeCard({
+    required this.icon,
+    required this.label,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                icon,
+                size: 32,
+                color: Theme.of(context).colorScheme.primary,
+              ),
+              const SizedBox(height: 8),
               Text(
-                state.isSwapped
-                    ? 'Übersetzung wird zuerst gezeigt'
-                    : 'Tippe auf die Karte zum Umdrehen, wische zum Navigieren',
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: Colors.grey,
-                    ),
+                label,
+                style: Theme.of(context).textTheme.bodyMedium,
+                textAlign: TextAlign.center,
               ),
             ],
           ),

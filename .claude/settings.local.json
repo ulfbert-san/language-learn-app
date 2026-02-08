@@ -11,7 +11,19 @@
       "WebSearch",
       "WebFetch(domain:quashbugs.com)",
       "Bash(flutter pub:*)",
-      "Bash(cmd /c \"cd /d C:\\Users\\Marcel.Lachmann\\Repos\\language-learn-app\\language_learn_app && flutter pub get\")"
+      "Bash(cmd /c \"cd /d C:\\Users\\Marcel.Lachmann\\Repos\\language-learn-app\\language_learn_app && flutter pub get\")",
+      "Bash(tree:*)",
+      "Bash(flutter doctor:*)",
+      "Bash(cmd /c \"cd /d C:\\\\Users\\\\lenovo\\\\repos\\\\language-learn-app\\\\language_learn_app && flutter doctor\")",
+      "Bash(findstr:*)",
+      "Bash(dart run build_runner build:*)",
+      "Bash(flutter analyze:*)",
+      "WebFetch(domain:pub.dev)",
+      "Bash(Select-String -Pattern \"de|tr\")",
+      "Bash(flutter emulators:*)",
+      "Bash(emulator:*)",
+      "Bash(\"$LOCALAPPDATA/Android/Sdk/emulator/emulator\" -list-avds)",
+      "Bash(flutter devices:*)"
     ]
   }
 }

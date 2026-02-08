@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-class FlashcardInputRow extends StatelessWidget {
+class FlashcardInputRow extends StatefulWidget {
   final int index;
   final String word;
   final String translation;
@@ -21,6 +21,40 @@ class FlashcardInputRow extends StatelessWidget {
   });
 
   @override
+  State<FlashcardInputRow> createState() => _FlashcardInputRowState();
+}
+
+class _FlashcardInputRowState extends State<FlashcardInputRow> {
+  late final TextEditingController _wordController;
+  late final TextEditingController _translationController;
+
+  @override
+  void initState() {
+    super.initState();
+    _wordController = TextEditingController(text: widget.word);
+    _translationController = TextEditingController(text: widget.translation);
+  }
+
+  @override
+  void didUpdateWidget(FlashcardInputRow oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.word != widget.word && _wordController.text != widget.word) {
+      _wordController.text = widget.word;
+    }
+    if (oldWidget.translation != widget.translation &&
+        _translationController.text != widget.translation) {
+      _translationController.text = widget.translation;
+    }
+  }
+
+  @override
+  void dispose() {
+    _wordController.dispose();
+    _translationController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Card(
       margin: const EdgeInsets.symmetric(vertical: 4),
@@ -32,16 +66,16 @@ class FlashcardInputRow extends StatelessWidget {
             Row(
               children: [
                 Text(
-                  '${index + 1}',
+                  '${widget.index + 1}',
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                         fontWeight: FontWeight.bold,
                       ),
                 ),
                 const Spacer(),
-                if (canDelete)
+                if (widget.canDelete)
                   IconButton(
                     icon: const Icon(Icons.delete_outline, size: 20),
-                    onPressed: onDelete,
+                    onPressed: widget.onDelete,
                     tooltip: 'Karte löschen',
                   ),
               ],
@@ -50,24 +84,24 @@ class FlashcardInputRow extends StatelessWidget {
             Row(
               children: [
                 Expanded(
-                  child: TextFormField(
-                    initialValue: word,
+                  child: TextField(
+                    controller: _wordController,
                     decoration: const InputDecoration(
                       labelText: 'BEGRIFF',
                       border: OutlineInputBorder(),
                     ),
-                    onChanged: onWordChanged,
+                    onChanged: widget.onWordChanged,
                   ),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
-                  child: TextFormField(
-                    initialValue: translation,
+                  child: TextField(
+                    controller: _translationController,
                     decoration: const InputDecoration(
                       labelText: 'DEFINITION',
                       border: OutlineInputBorder(),
                     ),
-                    onChanged: onTranslationChanged,
+                    onChanged: widget.onTranslationChanged,
                   ),
                 ),
               ],

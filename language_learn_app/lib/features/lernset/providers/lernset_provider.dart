@@ -16,6 +16,7 @@ class LernSetEditorState {
   final String description;
   final List<FlashcardInput> flashcards;
   final int? folderId;
+  final String? language;
   final bool isLoading;
   final String? error;
 
@@ -24,6 +25,7 @@ class LernSetEditorState {
     this.description = '',
     this.flashcards = const [],
     this.folderId,
+    this.language,
     this.isLoading = false,
     this.error,
   });
@@ -33,6 +35,8 @@ class LernSetEditorState {
     String? description,
     List<FlashcardInput>? flashcards,
     int? folderId,
+    String? language,
+    bool clearLanguage = false,
     bool? isLoading,
     String? error,
   }) {
@@ -41,6 +45,7 @@ class LernSetEditorState {
       description: description ?? this.description,
       flashcards: flashcards ?? this.flashcards,
       folderId: folderId ?? this.folderId,
+      language: clearLanguage ? null : (language ?? this.language),
       isLoading: isLoading ?? this.isLoading,
       error: error,
     );
@@ -66,6 +71,14 @@ class LernSetEditorNotifier extends StateNotifier<LernSetEditorState> {
 
   void setFolderId(int? folderId) {
     state = state.copyWith(folderId: folderId);
+  }
+
+  void setLanguage(String? language) {
+    if (language == null) {
+      state = state.copyWith(clearLanguage: true);
+    } else {
+      state = state.copyWith(language: language);
+    }
   }
 
   void updateFlashcard(int index, {String? word, String? translation}) {
@@ -116,6 +129,7 @@ class LernSetEditorNotifier extends StateNotifier<LernSetEditorState> {
         name: lernSet.name,
         description: lernSet.description ?? '',
         folderId: lernSet.folderId,
+        language: lernSet.language,
         flashcards: flashcards.isEmpty
             ? [FlashcardInput(word: '', translation: '')]
             : flashcards
@@ -156,6 +170,7 @@ class LernSetEditorNotifier extends StateNotifier<LernSetEditorState> {
           name: state.name,
           description: state.description.isEmpty ? null : state.description,
           folderId: state.folderId,
+          language: state.language,
           createdAt: existing.createdAt,
           updatedAt: DateTime.now(),
         );
@@ -167,6 +182,7 @@ class LernSetEditorNotifier extends StateNotifier<LernSetEditorState> {
           name: state.name,
           description: state.description.isEmpty ? null : state.description,
           folderId: state.folderId,
+          language: state.language,
         );
       }
 

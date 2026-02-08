@@ -42,9 +42,8 @@ class AppDrawer extends ConsumerWidget {
               child: Text(
                 'Deine Ordner',
                 style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w500,
-                  color: Colors.grey,
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
                 ),
               ),
             ),
@@ -55,7 +54,7 @@ class AppDrawer extends ConsumerWidget {
                   itemBuilder: (context, index) {
                     final folder = folders[index];
                     return ListTile(
-                      leading: const Icon(Icons.folder),
+                      leading: const Icon(Icons.folder_outlined),
                       title: Text(folder.name),
                       onTap: () {
                         Navigator.pop(context);
@@ -138,10 +137,9 @@ class AppDrawer extends ConsumerWidget {
                 ),
               ),
             ),
-            const Divider(),
             ListTile(
-              leading: const Icon(Icons.create_new_folder),
-              title: const Text('+ Neuer Ordner'),
+              leading: const Icon(Icons.add),
+              title: const Text('Neuer Ordner'),
               onTap: () async {
                 final name = await showDialog<String>(
                   context: context,
@@ -150,6 +148,15 @@ class AppDrawer extends ConsumerWidget {
                 if (name != null && name.isNotEmpty) {
                   await ref.read(foldersProvider.notifier).createFolder(name);
                 }
+              },
+            ),
+            const Divider(),
+            ListTile(
+              leading: const Icon(Icons.settings),
+              title: const Text('Einstellungen'),
+              onTap: () {
+                Navigator.pop(context);
+                context.goNamed('settings');
               },
             ),
           ],

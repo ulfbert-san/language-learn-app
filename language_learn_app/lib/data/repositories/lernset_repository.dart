@@ -25,11 +25,13 @@ class LernSetRepository {
     required String name,
     String? description,
     int? folderId,
+    String? language,
   }) {
     return _db.insertLernSet(LernSetsCompanion(
       name: Value(name),
       description: Value(description),
       folderId: Value(folderId),
+      language: Value(language),
     ));
   }
 

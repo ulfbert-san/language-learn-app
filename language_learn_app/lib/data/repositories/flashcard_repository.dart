@@ -51,6 +51,16 @@ class FlashcardRepository {
 
   Future<int> deleteAllByLernSet(int lernSetId) =>
       _db.deleteFlashcardsByLernSet(lernSetId);
+
+  // Spaced Repetition
+  Future<List<Flashcard>> getFlashcardsDueForReview(int lernSetId) =>
+      _db.getFlashcardsDueForReview(lernSetId);
+
+  Future<void> updateFlashcardBoxLevel(int cardId, int boxLevel, DateTime? nextReview) =>
+      _db.updateFlashcardBoxLevel(cardId, boxLevel, nextReview);
+
+  Future<Map<int, int>> getBoxLevelCounts(int lernSetId) =>
+      _db.getBoxLevelCounts(lernSetId);
 }
 
 final flashcardRepositoryProvider = Provider<FlashcardRepository>((ref) {

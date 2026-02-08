@@ -304,6 +304,17 @@ class $LernSetsTable extends LernSets with TableInfo<$LernSetsTable, LernSet> {
       'REFERENCES folders (id)',
     ),
   );
+  static const VerificationMeta _languageMeta = const VerificationMeta(
+    'language',
+  );
+  @override
+  late final GeneratedColumn<String> language = GeneratedColumn<String>(
+    'language',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _createdAtMeta = const VerificationMeta(
     'createdAt',
   );
@@ -334,6 +345,7 @@ class $LernSetsTable extends LernSets with TableInfo<$LernSetsTable, LernSet> {
     name,
     description,
     folderId,
+    language,
     createdAt,
     updatedAt,
   ];
@@ -375,6 +387,12 @@ class $LernSetsTable extends LernSets with TableInfo<$LernSetsTable, LernSet> {
         folderId.isAcceptableOrUnknown(data['folder_id']!, _folderIdMeta),
       );
     }
+    if (data.containsKey('language')) {
+      context.handle(
+        _languageMeta,
+        language.isAcceptableOrUnknown(data['language']!, _languageMeta),
+      );
+    }
     if (data.containsKey('created_at')) {
       context.handle(
         _createdAtMeta,
@@ -412,6 +430,10 @@ class $LernSetsTable extends LernSets with TableInfo<$LernSetsTable, LernSet> {
         DriftSqlType.int,
         data['${effectivePrefix}folder_id'],
       ),
+      language: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}language'],
+      ),
       createdAt: attachedDatabase.typeMapping.read(
         DriftSqlType.dateTime,
         data['${effectivePrefix}created_at'],
@@ -434,6 +456,7 @@ class LernSet extends DataClass implements Insertable<LernSet> {
   final String name;
   final String? description;
   final int? folderId;
+  final String? language;
   final DateTime createdAt;
   final DateTime updatedAt;
   const LernSet({
@@ -441,6 +464,7 @@ class LernSet extends DataClass implements Insertable<LernSet> {
     required this.name,
     this.description,
     this.folderId,
+    this.language,
     required this.createdAt,
     required this.updatedAt,
   });
@@ -454,6 +478,9 @@ class LernSet extends DataClass implements Insertable<LernSet> {
     }
     if (!nullToAbsent || folderId != null) {
       map['folder_id'] = Variable<int>(folderId);
+    }
+    if (!nullToAbsent || language != null) {
+      map['language'] = Variable<String>(language);
     }
     map['created_at'] = Variable<DateTime>(createdAt);
     map['updated_at'] = Variable<DateTime>(updatedAt);
@@ -470,6 +497,9 @@ class LernSet extends DataClass implements Insertable<LernSet> {
       folderId: folderId == null && nullToAbsent
           ? const Value.absent()
           : Value(folderId),
+      language: language == null && nullToAbsent
+          ? const Value.absent()
+          : Value(language),
       createdAt: Value(createdAt),
       updatedAt: Value(updatedAt),
     );
@@ -485,6 +515,7 @@ class LernSet extends DataClass implements Insertable<LernSet> {
       name: serializer.fromJson<String>(json['name']),
       description: serializer.fromJson<String?>(json['description']),
       folderId: serializer.fromJson<int?>(json['folderId']),
+      language: serializer.fromJson<String?>(json['language']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
       updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
     );
@@ -497,6 +528,7 @@ class LernSet extends DataClass implements Insertable<LernSet> {
       'name': serializer.toJson<String>(name),
       'description': serializer.toJson<String?>(description),
       'folderId': serializer.toJson<int?>(folderId),
+      'language': serializer.toJson<String?>(language),
       'createdAt': serializer.toJson<DateTime>(createdAt),
       'updatedAt': serializer.toJson<DateTime>(updatedAt),
     };
@@ -507,6 +539,7 @@ class LernSet extends DataClass implements Insertable<LernSet> {
     String? name,
     Value<String?> description = const Value.absent(),
     Value<int?> folderId = const Value.absent(),
+    Value<String?> language = const Value.absent(),
     DateTime? createdAt,
     DateTime? updatedAt,
   }) => LernSet(
@@ -514,6 +547,7 @@ class LernSet extends DataClass implements Insertable<LernSet> {
     name: name ?? this.name,
     description: description.present ? description.value : this.description,
     folderId: folderId.present ? folderId.value : this.folderId,
+    language: language.present ? language.value : this.language,
     createdAt: createdAt ?? this.createdAt,
     updatedAt: updatedAt ?? this.updatedAt,
   );
@@ -525,6 +559,7 @@ class LernSet extends DataClass implements Insertable<LernSet> {
           ? data.description.value
           : this.description,
       folderId: data.folderId.present ? data.folderId.value : this.folderId,
+      language: data.language.present ? data.language.value : this.language,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
     );
@@ -537,6 +572,7 @@ class LernSet extends DataClass implements Insertable<LernSet> {
           ..write('name: $name, ')
           ..write('description: $description, ')
           ..write('folderId: $folderId, ')
+          ..write('language: $language, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt')
           ..write(')'))
@@ -544,8 +580,15 @@ class LernSet extends DataClass implements Insertable<LernSet> {
   }
 
   @override
-  int get hashCode =>
-      Object.hash(id, name, description, folderId, createdAt, updatedAt);
+  int get hashCode => Object.hash(
+    id,
+    name,
+    description,
+    folderId,
+    language,
+    createdAt,
+    updatedAt,
+  );
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -554,6 +597,7 @@ class LernSet extends DataClass implements Insertable<LernSet> {
           other.name == this.name &&
           other.description == this.description &&
           other.folderId == this.folderId &&
+          other.language == this.language &&
           other.createdAt == this.createdAt &&
           other.updatedAt == this.updatedAt);
 }
@@ -563,6 +607,7 @@ class LernSetsCompanion extends UpdateCompanion<LernSet> {
   final Value<String> name;
   final Value<String?> description;
   final Value<int?> folderId;
+  final Value<String?> language;
   final Value<DateTime> createdAt;
   final Value<DateTime> updatedAt;
   const LernSetsCompanion({
@@ -570,6 +615,7 @@ class LernSetsCompanion extends UpdateCompanion<LernSet> {
     this.name = const Value.absent(),
     this.description = const Value.absent(),
     this.folderId = const Value.absent(),
+    this.language = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
   });
@@ -578,6 +624,7 @@ class LernSetsCompanion extends UpdateCompanion<LernSet> {
     required String name,
     this.description = const Value.absent(),
     this.folderId = const Value.absent(),
+    this.language = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
   }) : name = Value(name);
@@ -586,6 +633,7 @@ class LernSetsCompanion extends UpdateCompanion<LernSet> {
     Expression<String>? name,
     Expression<String>? description,
     Expression<int>? folderId,
+    Expression<String>? language,
     Expression<DateTime>? createdAt,
     Expression<DateTime>? updatedAt,
   }) {
@@ -594,6 +642,7 @@ class LernSetsCompanion extends UpdateCompanion<LernSet> {
       if (name != null) 'name': name,
       if (description != null) 'description': description,
       if (folderId != null) 'folder_id': folderId,
+      if (language != null) 'language': language,
       if (createdAt != null) 'created_at': createdAt,
       if (updatedAt != null) 'updated_at': updatedAt,
     });
@@ -604,6 +653,7 @@ class LernSetsCompanion extends UpdateCompanion<LernSet> {
     Value<String>? name,
     Value<String?>? description,
     Value<int?>? folderId,
+    Value<String?>? language,
     Value<DateTime>? createdAt,
     Value<DateTime>? updatedAt,
   }) {
@@ -612,6 +662,7 @@ class LernSetsCompanion extends UpdateCompanion<LernSet> {
       name: name ?? this.name,
       description: description ?? this.description,
       folderId: folderId ?? this.folderId,
+      language: language ?? this.language,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
     );
@@ -632,6 +683,9 @@ class LernSetsCompanion extends UpdateCompanion<LernSet> {
     if (folderId.present) {
       map['folder_id'] = Variable<int>(folderId.value);
     }
+    if (language.present) {
+      map['language'] = Variable<String>(language.value);
+    }
     if (createdAt.present) {
       map['created_at'] = Variable<DateTime>(createdAt.value);
     }
@@ -648,6 +702,7 @@ class LernSetsCompanion extends UpdateCompanion<LernSet> {
           ..write('name: $name, ')
           ..write('description: $description, ')
           ..write('folderId: $folderId, ')
+          ..write('language: $language, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt')
           ..write(')'))
@@ -727,6 +782,29 @@ class $FlashcardsTable extends Flashcards
     type: DriftSqlType.int,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _boxLevelMeta = const VerificationMeta(
+    'boxLevel',
+  );
+  @override
+  late final GeneratedColumn<int> boxLevel = GeneratedColumn<int>(
+    'box_level',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(1),
+  );
+  static const VerificationMeta _nextReviewMeta = const VerificationMeta(
+    'nextReview',
+  );
+  @override
+  late final GeneratedColumn<DateTime> nextReview = GeneratedColumn<DateTime>(
+    'next_review',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -734,6 +812,8 @@ class $FlashcardsTable extends Flashcards
     word,
     translation,
     position,
+    boxLevel,
+    nextReview,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -785,6 +865,18 @@ class $FlashcardsTable extends Flashcards
     } else if (isInserting) {
       context.missing(_positionMeta);
     }
+    if (data.containsKey('box_level')) {
+      context.handle(
+        _boxLevelMeta,
+        boxLevel.isAcceptableOrUnknown(data['box_level']!, _boxLevelMeta),
+      );
+    }
+    if (data.containsKey('next_review')) {
+      context.handle(
+        _nextReviewMeta,
+        nextReview.isAcceptableOrUnknown(data['next_review']!, _nextReviewMeta),
+      );
+    }
     return context;
   }
 
@@ -814,6 +906,14 @@ class $FlashcardsTable extends Flashcards
         DriftSqlType.int,
         data['${effectivePrefix}position'],
       )!,
+      boxLevel: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}box_level'],
+      )!,
+      nextReview: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}next_review'],
+      ),
     );
   }
 
@@ -829,12 +929,16 @@ class Flashcard extends DataClass implements Insertable<Flashcard> {
   final String word;
   final String translation;
   final int position;
+  final int boxLevel;
+  final DateTime? nextReview;
   const Flashcard({
     required this.id,
     required this.lernSetId,
     required this.word,
     required this.translation,
     required this.position,
+    required this.boxLevel,
+    this.nextReview,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -844,6 +948,10 @@ class Flashcard extends DataClass implements Insertable<Flashcard> {
     map['word'] = Variable<String>(word);
     map['translation'] = Variable<String>(translation);
     map['position'] = Variable<int>(position);
+    map['box_level'] = Variable<int>(boxLevel);
+    if (!nullToAbsent || nextReview != null) {
+      map['next_review'] = Variable<DateTime>(nextReview);
+    }
     return map;
   }
 
@@ -854,6 +962,10 @@ class Flashcard extends DataClass implements Insertable<Flashcard> {
       word: Value(word),
       translation: Value(translation),
       position: Value(position),
+      boxLevel: Value(boxLevel),
+      nextReview: nextReview == null && nullToAbsent
+          ? const Value.absent()
+          : Value(nextReview),
     );
   }
 
@@ -868,6 +980,8 @@ class Flashcard extends DataClass implements Insertable<Flashcard> {
       word: serializer.fromJson<String>(json['word']),
       translation: serializer.fromJson<String>(json['translation']),
       position: serializer.fromJson<int>(json['position']),
+      boxLevel: serializer.fromJson<int>(json['boxLevel']),
+      nextReview: serializer.fromJson<DateTime?>(json['nextReview']),
     );
   }
   @override
@@ -879,6 +993,8 @@ class Flashcard extends DataClass implements Insertable<Flashcard> {
       'word': serializer.toJson<String>(word),
       'translation': serializer.toJson<String>(translation),
       'position': serializer.toJson<int>(position),
+      'boxLevel': serializer.toJson<int>(boxLevel),
+      'nextReview': serializer.toJson<DateTime?>(nextReview),
     };
   }
 
@@ -888,12 +1004,16 @@ class Flashcard extends DataClass implements Insertable<Flashcard> {
     String? word,
     String? translation,
     int? position,
+    int? boxLevel,
+    Value<DateTime?> nextReview = const Value.absent(),
   }) => Flashcard(
     id: id ?? this.id,
     lernSetId: lernSetId ?? this.lernSetId,
     word: word ?? this.word,
     translation: translation ?? this.translation,
     position: position ?? this.position,
+    boxLevel: boxLevel ?? this.boxLevel,
+    nextReview: nextReview.present ? nextReview.value : this.nextReview,
   );
   Flashcard copyWithCompanion(FlashcardsCompanion data) {
     return Flashcard(
@@ -904,6 +1024,10 @@ class Flashcard extends DataClass implements Insertable<Flashcard> {
           ? data.translation.value
           : this.translation,
       position: data.position.present ? data.position.value : this.position,
+      boxLevel: data.boxLevel.present ? data.boxLevel.value : this.boxLevel,
+      nextReview: data.nextReview.present
+          ? data.nextReview.value
+          : this.nextReview,
     );
   }
 
@@ -914,13 +1038,23 @@ class Flashcard extends DataClass implements Insertable<Flashcard> {
           ..write('lernSetId: $lernSetId, ')
           ..write('word: $word, ')
           ..write('translation: $translation, ')
-          ..write('position: $position')
+          ..write('position: $position, ')
+          ..write('boxLevel: $boxLevel, ')
+          ..write('nextReview: $nextReview')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(id, lernSetId, word, translation, position);
+  int get hashCode => Object.hash(
+    id,
+    lernSetId,
+    word,
+    translation,
+    position,
+    boxLevel,
+    nextReview,
+  );
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -929,7 +1063,9 @@ class Flashcard extends DataClass implements Insertable<Flashcard> {
           other.lernSetId == this.lernSetId &&
           other.word == this.word &&
           other.translation == this.translation &&
-          other.position == this.position);
+          other.position == this.position &&
+          other.boxLevel == this.boxLevel &&
+          other.nextReview == this.nextReview);
 }
 
 class FlashcardsCompanion extends UpdateCompanion<Flashcard> {
@@ -938,12 +1074,16 @@ class FlashcardsCompanion extends UpdateCompanion<Flashcard> {
   final Value<String> word;
   final Value<String> translation;
   final Value<int> position;
+  final Value<int> boxLevel;
+  final Value<DateTime?> nextReview;
   const FlashcardsCompanion({
     this.id = const Value.absent(),
     this.lernSetId = const Value.absent(),
     this.word = const Value.absent(),
     this.translation = const Value.absent(),
     this.position = const Value.absent(),
+    this.boxLevel = const Value.absent(),
+    this.nextReview = const Value.absent(),
   });
   FlashcardsCompanion.insert({
     this.id = const Value.absent(),
@@ -951,6 +1091,8 @@ class FlashcardsCompanion extends UpdateCompanion<Flashcard> {
     required String word,
     required String translation,
     required int position,
+    this.boxLevel = const Value.absent(),
+    this.nextReview = const Value.absent(),
   }) : lernSetId = Value(lernSetId),
        word = Value(word),
        translation = Value(translation),
@@ -961,6 +1103,8 @@ class FlashcardsCompanion extends UpdateCompanion<Flashcard> {
     Expression<String>? word,
     Expression<String>? translation,
     Expression<int>? position,
+    Expression<int>? boxLevel,
+    Expression<DateTime>? nextReview,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -968,6 +1112,8 @@ class FlashcardsCompanion extends UpdateCompanion<Flashcard> {
       if (word != null) 'word': word,
       if (translation != null) 'translation': translation,
       if (position != null) 'position': position,
+      if (boxLevel != null) 'box_level': boxLevel,
+      if (nextReview != null) 'next_review': nextReview,
     });
   }
 
@@ -977,6 +1123,8 @@ class FlashcardsCompanion extends UpdateCompanion<Flashcard> {
     Value<String>? word,
     Value<String>? translation,
     Value<int>? position,
+    Value<int>? boxLevel,
+    Value<DateTime?>? nextReview,
   }) {
     return FlashcardsCompanion(
       id: id ?? this.id,
@@ -984,6 +1132,8 @@ class FlashcardsCompanion extends UpdateCompanion<Flashcard> {
       word: word ?? this.word,
       translation: translation ?? this.translation,
       position: position ?? this.position,
+      boxLevel: boxLevel ?? this.boxLevel,
+      nextReview: nextReview ?? this.nextReview,
     );
   }
 
@@ -1005,6 +1155,12 @@ class FlashcardsCompanion extends UpdateCompanion<Flashcard> {
     if (position.present) {
       map['position'] = Variable<int>(position.value);
     }
+    if (boxLevel.present) {
+      map['box_level'] = Variable<int>(boxLevel.value);
+    }
+    if (nextReview.present) {
+      map['next_review'] = Variable<DateTime>(nextReview.value);
+    }
     return map;
   }
 
@@ -1015,7 +1171,9 @@ class FlashcardsCompanion extends UpdateCompanion<Flashcard> {
           ..write('lernSetId: $lernSetId, ')
           ..write('word: $word, ')
           ..write('translation: $translation, ')
-          ..write('position: $position')
+          ..write('position: $position, ')
+          ..write('boxLevel: $boxLevel, ')
+          ..write('nextReview: $nextReview')
           ..write(')'))
         .toString();
   }
@@ -1290,6 +1448,7 @@ typedef $$LernSetsTableCreateCompanionBuilder =
       required String name,
       Value<String?> description,
       Value<int?> folderId,
+      Value<String?> language,
       Value<DateTime> createdAt,
       Value<DateTime> updatedAt,
     });
@@ -1299,6 +1458,7 @@ typedef $$LernSetsTableUpdateCompanionBuilder =
       Value<String> name,
       Value<String?> description,
       Value<int?> folderId,
+      Value<String?> language,
       Value<DateTime> createdAt,
       Value<DateTime> updatedAt,
     });
@@ -1364,6 +1524,11 @@ class $$LernSetsTableFilterComposer
 
   ColumnFilters<String> get description => $composableBuilder(
     column: $table.description,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get language => $composableBuilder(
+    column: $table.language,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -1450,6 +1615,11 @@ class $$LernSetsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get language => $composableBuilder(
+    column: $table.language,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<DateTime> get createdAt => $composableBuilder(
     column: $table.createdAt,
     builder: (column) => ColumnOrderings(column),
@@ -1503,6 +1673,9 @@ class $$LernSetsTableAnnotationComposer
     column: $table.description,
     builder: (column) => column,
   );
+
+  GeneratedColumn<String> get language =>
+      $composableBuilder(column: $table.language, builder: (column) => column);
 
   GeneratedColumn<DateTime> get createdAt =>
       $composableBuilder(column: $table.createdAt, builder: (column) => column);
@@ -1591,6 +1764,7 @@ class $$LernSetsTableTableManager
                 Value<String> name = const Value.absent(),
                 Value<String?> description = const Value.absent(),
                 Value<int?> folderId = const Value.absent(),
+                Value<String?> language = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
                 Value<DateTime> updatedAt = const Value.absent(),
               }) => LernSetsCompanion(
@@ -1598,6 +1772,7 @@ class $$LernSetsTableTableManager
                 name: name,
                 description: description,
                 folderId: folderId,
+                language: language,
                 createdAt: createdAt,
                 updatedAt: updatedAt,
               ),
@@ -1607,6 +1782,7 @@ class $$LernSetsTableTableManager
                 required String name,
                 Value<String?> description = const Value.absent(),
                 Value<int?> folderId = const Value.absent(),
+                Value<String?> language = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
                 Value<DateTime> updatedAt = const Value.absent(),
               }) => LernSetsCompanion.insert(
@@ -1614,6 +1790,7 @@ class $$LernSetsTableTableManager
                 name: name,
                 description: description,
                 folderId: folderId,
+                language: language,
                 createdAt: createdAt,
                 updatedAt: updatedAt,
               ),
@@ -1710,6 +1887,8 @@ typedef $$FlashcardsTableCreateCompanionBuilder =
       required String word,
       required String translation,
       required int position,
+      Value<int> boxLevel,
+      Value<DateTime?> nextReview,
     });
 typedef $$FlashcardsTableUpdateCompanionBuilder =
     FlashcardsCompanion Function({
@@ -1718,6 +1897,8 @@ typedef $$FlashcardsTableUpdateCompanionBuilder =
       Value<String> word,
       Value<String> translation,
       Value<int> position,
+      Value<int> boxLevel,
+      Value<DateTime?> nextReview,
     });
 
 final class $$FlashcardsTableReferences
@@ -1770,6 +1951,16 @@ class $$FlashcardsTableFilterComposer
 
   ColumnFilters<int> get position => $composableBuilder(
     column: $table.position,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get boxLevel => $composableBuilder(
+    column: $table.boxLevel,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get nextReview => $composableBuilder(
+    column: $table.nextReview,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -1826,6 +2017,16 @@ class $$FlashcardsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<int> get boxLevel => $composableBuilder(
+    column: $table.boxLevel,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get nextReview => $composableBuilder(
+    column: $table.nextReview,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   $$LernSetsTableOrderingComposer get lernSetId {
     final $$LernSetsTableOrderingComposer composer = $composerBuilder(
       composer: this,
@@ -1872,6 +2073,14 @@ class $$FlashcardsTableAnnotationComposer
 
   GeneratedColumn<int> get position =>
       $composableBuilder(column: $table.position, builder: (column) => column);
+
+  GeneratedColumn<int> get boxLevel =>
+      $composableBuilder(column: $table.boxLevel, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get nextReview => $composableBuilder(
+    column: $table.nextReview,
+    builder: (column) => column,
+  );
 
   $$LernSetsTableAnnotationComposer get lernSetId {
     final $$LernSetsTableAnnotationComposer composer = $composerBuilder(
@@ -1930,12 +2139,16 @@ class $$FlashcardsTableTableManager
                 Value<String> word = const Value.absent(),
                 Value<String> translation = const Value.absent(),
                 Value<int> position = const Value.absent(),
+                Value<int> boxLevel = const Value.absent(),
+                Value<DateTime?> nextReview = const Value.absent(),
               }) => FlashcardsCompanion(
                 id: id,
                 lernSetId: lernSetId,
                 word: word,
                 translation: translation,
                 position: position,
+                boxLevel: boxLevel,
+                nextReview: nextReview,
               ),
           createCompanionCallback:
               ({
@@ -1944,12 +2157,16 @@ class $$FlashcardsTableTableManager
                 required String word,
                 required String translation,
                 required int position,
+                Value<int> boxLevel = const Value.absent(),
+                Value<DateTime?> nextReview = const Value.absent(),
               }) => FlashcardsCompanion.insert(
                 id: id,
                 lernSetId: lernSetId,
                 word: word,
                 translation: translation,
                 position: position,
+                boxLevel: boxLevel,
+                nextReview: nextReview,
               ),
           withReferenceMapper: (p0) => p0
               .map(

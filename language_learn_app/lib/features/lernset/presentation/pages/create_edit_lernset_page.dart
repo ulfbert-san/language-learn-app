@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../home/providers/home_provider.dart';
+import '../../../settings/providers/settings_provider.dart';
 import '../../providers/lernset_provider.dart';
 import '../widgets/flashcard_input_row.dart';
 import '../widgets/import_dialog.dart';
@@ -76,139 +77,142 @@ class _CreateEditLernSetPageState extends ConsumerState<CreateEditLernSetPage> {
       appBar: AppBar(
         title: Text(isEditing ? 'LernSet bearbeiten' : 'Neues Lernset erstellen'),
         automaticallyImplyLeading: false,
-        actions: [
-          OutlinedButton(
-            onPressed: state.isLoading ? null : () => _save(context, false),
-            child: const Text('Erstellen'),
-          ),
-          const SizedBox(width: 8),
-          ElevatedButton(
-            onPressed: state.isLoading ? null : () => _save(context, true),
-            child: const Text('Erstellen und üben'),
-          ),
-          const SizedBox(width: 16),
-        ],
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            if (state.error != null)
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(12),
-                margin: const EdgeInsets.only(bottom: 16),
-                decoration: BoxDecoration(
-                  color: Colors.red.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: Colors.red),
-                ),
-                child: Text(
-                  state.error!,
-                  style: const TextStyle(color: Colors.red),
-                ),
+      body: Column(
+        children: [
+          Expanded(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  if (state.error != null)
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(12),
+                      margin: const EdgeInsets.only(bottom: 16),
+                      decoration: BoxDecoration(
+                        color: Colors.red.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(color: Colors.red),
+                      ),
+                      child: Text(
+                        state.error!,
+                        style: const TextStyle(color: Colors.red),
+                      ),
+                    ),
+                  TextField(
+                    controller: _nameController,
+                    decoration: const InputDecoration(
+                      labelText: 'Titel',
+                      hintText: 'Gib deinem LernSet einen Namen',
+                    ),
+                    onChanged: (value) {
+                      ref.read(lernSetEditorProvider.notifier).setName(value);
+                    },
+                  ),
+                  const SizedBox(height: 16),
+                  TextField(
+                    controller: _descriptionController,
+                    decoration: const InputDecoration(
+                      labelText: 'Beschreibung hinzufügen...',
+                      hintText: 'Optional: Beschreibe dein LernSet',
+                    ),
+                    maxLines: 2,
+                    onChanged: (value) {
+                      ref.read(lernSetEditorProvider.notifier).setDescription(value);
+                    },
+                  ),
+                  const SizedBox(height: 16),
+                  _buildLanguageDropdown(context, ref, state),
+                  const SizedBox(height: 24),
+                  Row(
+                    children: [
+                      OutlinedButton.icon(
+                        onPressed: () => _showImportDialog(context),
+                        icon: const Icon(Icons.add),
+                        label: const Text('Importieren'),
+                      ),
+                      const SizedBox(width: 8),
+                      OutlinedButton.icon(
+                        onPressed: state.flashcards.any((c) =>
+                                c.word.isNotEmpty && c.translation.isNotEmpty)
+                            ? () => _showExportDialog(context, state.flashcards)
+                            : null,
+                        icon: const Icon(Icons.download),
+                        label: const Text('Exportieren'),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 24),
+                  ListView.builder(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    itemCount: state.flashcards.length,
+                    itemBuilder: (context, index) {
+                      final card = state.flashcards[index];
+                      return FlashcardInputRow(
+                        key: ValueKey('card_$index'),
+                        index: index,
+                        word: card.word,
+                        translation: card.translation,
+                        canDelete: state.flashcards.length > 1,
+                        onWordChanged: (value) {
+                          ref
+                              .read(lernSetEditorProvider.notifier)
+                              .updateFlashcard(index, word: value);
+                        },
+                        onTranslationChanged: (value) {
+                          ref
+                              .read(lernSetEditorProvider.notifier)
+                              .updateFlashcard(index, translation: value);
+                        },
+                        onDelete: () {
+                          ref
+                              .read(lernSetEditorProvider.notifier)
+                              .removeFlashcard(index);
+                        },
+                      );
+                    },
+                  ),
+                ],
               ),
-            TextField(
-              controller: _nameController,
-              decoration: const InputDecoration(
-                labelText: 'Titel',
-                hintText: 'Gib deinem LernSet einen Namen',
-              ),
-              onChanged: (value) {
-                ref.read(lernSetEditorProvider.notifier).setName(value);
-              },
             ),
-            const SizedBox(height: 16),
-            TextField(
-              controller: _descriptionController,
-              decoration: const InputDecoration(
-                labelText: 'Beschreibung hinzufügen...',
-                hintText: 'Optional: Beschreibe dein LernSet',
-              ),
-              maxLines: 2,
-              onChanged: (value) {
-                ref.read(lernSetEditorProvider.notifier).setDescription(value);
-              },
-            ),
-            const SizedBox(height: 24),
-            Row(
-              children: [
-                OutlinedButton.icon(
-                  onPressed: () => _showImportDialog(context),
-                  icon: const Icon(Icons.add),
-                  label: const Text('Importieren'),
-                ),
-                const SizedBox(width: 8),
-                OutlinedButton.icon(
-                  onPressed: state.flashcards.any((c) =>
-                          c.word.isNotEmpty && c.translation.isNotEmpty)
-                      ? () => _showExportDialog(context, state.flashcards)
-                      : null,
-                  icon: const Icon(Icons.download),
-                  label: const Text('Exportieren'),
+          ),
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Theme.of(context).scaffoldBackgroundColor,
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.1),
+                  blurRadius: 4,
+                  offset: const Offset(0, -2),
                 ),
               ],
             ),
-            const SizedBox(height: 24),
-            ListView.builder(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              itemCount: state.flashcards.length,
-              itemBuilder: (context, index) {
-                final card = state.flashcards[index];
-                return FlashcardInputRow(
-                  key: ValueKey('card_$index'),
-                  index: index,
-                  word: card.word,
-                  translation: card.translation,
-                  canDelete: state.flashcards.length > 1,
-                  onWordChanged: (value) {
-                    ref
-                        .read(lernSetEditorProvider.notifier)
-                        .updateFlashcard(index, word: value);
-                  },
-                  onTranslationChanged: (value) {
-                    ref
-                        .read(lernSetEditorProvider.notifier)
-                        .updateFlashcard(index, translation: value);
-                  },
-                  onDelete: () {
-                    ref
-                        .read(lernSetEditorProvider.notifier)
-                        .removeFlashcard(index);
-                  },
-                );
-              },
-            ),
-            const SizedBox(height: 16),
-            Center(
-              child: OutlinedButton.icon(
-                onPressed: () {
-                  ref.read(lernSetEditorProvider.notifier).addFlashcard();
-                },
-                icon: const Icon(Icons.add),
-                label: const Text('Karte hinzufügen'),
-              ),
-            ),
-            const SizedBox(height: 32),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
+            child: Row(
               children: [
-                OutlinedButton(
-                  onPressed: state.isLoading ? null : () => _save(context, false),
-                  child: const Text('Erstellen'),
+                Expanded(
+                  child: OutlinedButton.icon(
+                    onPressed: () {
+                      ref.read(lernSetEditorProvider.notifier).addFlashcard();
+                    },
+                    icon: const Icon(Icons.add),
+                    label: const Text('Karte hinzufügen'),
+                  ),
                 ),
                 const SizedBox(width: 12),
-                ElevatedButton(
-                  onPressed: state.isLoading ? null : () => _save(context, true),
-                  child: const Text('Erstellen und üben'),
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: state.isLoading ? null : () => _save(context, false),
+                    child: const Text('Erstellen'),
+                  ),
                 ),
               ],
             ),
-            const SizedBox(height: 32),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
@@ -248,5 +252,43 @@ class _CreateEditLernSetPageState extends ConsumerState<CreateEditLernSetPage> {
         context.goNamed('home');
       }
     }
+  }
+
+  Widget _buildLanguageDropdown(
+    BuildContext context,
+    WidgetRef ref,
+    LernSetEditorState state,
+  ) {
+    final globalLanguage = ref.watch(syllableLanguageProvider);
+    final effectiveLanguage = state.language ?? globalLanguage;
+
+    return DropdownButtonFormField<String?>(
+      value: state.language,
+      decoration: InputDecoration(
+        labelText: 'Silbentrennung-Sprache',
+        helperText: state.language == null
+            ? 'Verwendet Standard: ${effectiveLanguage == 'de' ? 'Deutsch' : 'Türkisch'}'
+            : null,
+      ),
+      items: [
+        DropdownMenuItem<String?>(
+          value: null,
+          child: Text(
+            'Standard (${globalLanguage == 'de' ? 'Deutsch' : 'Türkisch'})',
+          ),
+        ),
+        const DropdownMenuItem(
+          value: 'de',
+          child: Text('Deutsch'),
+        ),
+        const DropdownMenuItem(
+          value: 'tr',
+          child: Text('Türkisch'),
+        ),
+      ],
+      onChanged: (value) {
+        ref.read(lernSetEditorProvider.notifier).setLanguage(value);
+      },
+    );
   }
 }

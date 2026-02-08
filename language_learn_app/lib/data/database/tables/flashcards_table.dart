@@ -8,4 +8,7 @@ class Flashcards extends Table {
   TextColumn get word => text().withLength(min: 1, max: 500)();
   TextColumn get translation => text().withLength(min: 1, max: 500)();
   IntColumn get position => integer()();
+  // Spaced Repetition (Leitner System)
+  IntColumn get boxLevel => integer().withDefault(const Constant(1))();
+  DateTimeColumn get nextReview => dateTime().nullable()();
 }

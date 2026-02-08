@@ -6,6 +6,13 @@ import '../features/folders/presentation/pages/folder_page.dart';
 import '../features/home/presentation/pages/home_page.dart';
 import '../features/lernset/presentation/pages/create_edit_lernset_page.dart';
 import '../features/study/presentation/pages/study_page.dart';
+import '../features/study/presentation/pages/multiple_choice_page.dart';
+import '../features/study/presentation/pages/typing_page.dart';
+import '../features/study/presentation/pages/matching_page.dart';
+import '../features/study/presentation/pages/spaced_repetition_page.dart';
+import '../features/study/presentation/pages/build_the_word_page.dart';
+import '../features/study/presentation/pages/vocab_tetris_page.dart';
+import '../features/settings/presentation/pages/settings_page.dart';
 import 'app_drawer.dart';
 
 final routerProvider = Provider<GoRouter>((ref) {
@@ -63,6 +70,75 @@ final routerProvider = Provider<GoRouter>((ref) {
               final lernSetId = int.parse(state.pathParameters['lernSetId']!);
               return MaterialPage(
                 child: StudyPage(lernSetId: lernSetId),
+              );
+            },
+          ),
+          GoRoute(
+            path: '/study/:lernSetId/quiz',
+            name: 'multipleChoice',
+            pageBuilder: (context, state) {
+              final lernSetId = int.parse(state.pathParameters['lernSetId']!);
+              return MaterialPage(
+                child: MultipleChoicePage(lernSetId: lernSetId),
+              );
+            },
+          ),
+          GoRoute(
+            path: '/study/:lernSetId/typing',
+            name: 'typing',
+            pageBuilder: (context, state) {
+              final lernSetId = int.parse(state.pathParameters['lernSetId']!);
+              return MaterialPage(
+                child: TypingPage(lernSetId: lernSetId),
+              );
+            },
+          ),
+          GoRoute(
+            path: '/study/:lernSetId/matching',
+            name: 'matching',
+            pageBuilder: (context, state) {
+              final lernSetId = int.parse(state.pathParameters['lernSetId']!);
+              return MaterialPage(
+                child: MatchingPage(lernSetId: lernSetId),
+              );
+            },
+          ),
+          GoRoute(
+            path: '/study/:lernSetId/spaced-repetition',
+            name: 'spacedRepetition',
+            pageBuilder: (context, state) {
+              final lernSetId = int.parse(state.pathParameters['lernSetId']!);
+              return MaterialPage(
+                child: SpacedRepetitionPage(lernSetId: lernSetId),
+              );
+            },
+          ),
+          GoRoute(
+            path: '/study/:lernSetId/build-word',
+            name: 'buildTheWord',
+            pageBuilder: (context, state) {
+              final lernSetId = int.parse(state.pathParameters['lernSetId']!);
+              return MaterialPage(
+                child: BuildTheWordPage(lernSetId: lernSetId),
+              );
+            },
+          ),
+          GoRoute(
+            path: '/study/:lernSetId/vocab-tetris',
+            name: 'vocabTetris',
+            pageBuilder: (context, state) {
+              final lernSetId = int.parse(state.pathParameters['lernSetId']!);
+              return MaterialPage(
+                child: VocabTetrisPage(lernSetId: lernSetId),
+              );
+            },
+          ),
+          GoRoute(
+            path: '/settings',
+            name: 'settings',
+            pageBuilder: (context, state) {
+              return const NoTransitionPage(
+                child: SettingsPage(),
               );
             },
           ),
