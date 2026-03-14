@@ -52,6 +52,43 @@ class FlashcardRepository {
   Future<int> deleteAllByLernSet(int lernSetId) =>
       _db.deleteFlashcardsByLernSet(lernSetId);
 
+  Future<void> upsertFlashcards(
+    int lernSetId,
+    List<({int? id, String word, String translation, bool isContentChanged})> cards,
+  ) async {
+    // Collect IDs of existing cards that are still present
+    final keepIds = cards
+        .where((c) => c.id != null)
+        .map((c) => c.id!)
+        .toList();
+
+    // Delete cards that were removed by the user
+    await _db.deleteFlashcardsNotInSet(lernSetId, keepIds);
+
+    // Process each card
+    for (int i = 0; i < cards.length; i++) {
+      final card = cards[i];
+      if (card.id != null) {
+        // Existing card: update fields, reset progress only if content changed
+        await _db.updateFlashcardFields(
+          card.id!,
+          word: card.word,
+          translation: card.translation,
+          position: i,
+          resetProgress: card.isContentChanged,
+        );
+      } else {
+        // New card: insert with default box level
+        await _db.insertFlashcard(FlashcardsCompanion(
+          lernSetId: Value(lernSetId),
+          word: Value(card.word),
+          translation: Value(card.translation),
+          position: Value(i),
+        ));
+      }
+    }
+  }
+
   // Spaced Repetition
   Future<List<Flashcard>> getFlashcardsDueForReview(int lernSetId) =>
       _db.getFlashcardsDueForReview(lernSetId);

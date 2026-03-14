@@ -23,7 +23,17 @@
       "Bash(flutter emulators:*)",
       "Bash(emulator:*)",
       "Bash(\"$LOCALAPPDATA/Android/Sdk/emulator/emulator\" -list-avds)",
-      "Bash(flutter devices:*)"
+      "Bash(flutter devices:*)",
+      "Bash(\"C:/Android/jdk-17/bin/keytool\" -list -v -keystore \"C:/Users/Marcel.Lachmann/.android/debug.keystore\" -storepass android -alias androiddebugkey)",
+      "Bash(\"C:/Android/jdk-17/bin/keytool\" -printcert -jarfile \"C:/Users/Marcel.Lachmann/Downloads/app-release.apk\")",
+      "Bash(\"C:/Android/jdk-17/bin/keytool\" -printcert -jarfile \"C:/Users/Marcel.Lachmann/Downloads/app-release/app-release.apk\")",
+      "Bash(\"C:/Android/sdk/build-tools/35.0.0/apksigner.bat\" verify --print-certs \"C:/Users/Marcel.Lachmann/Downloads/app-release/app-release.apk\")",
+      "Bash(keytool:*)",
+      "Bash(cmd /c \"where keytool 2>nul & where java 2>nul & echo JAVA_HOME=%JAVA_HOME% & dir /b \"\"C:\\\\Program Files\\\\Android\\\\Android Studio\\\\jbr\\\\bin\\\\keytool*\"\" 2>nul & dir /b \"\"C:\\\\Program Files\\\\Java\"\" 2>nul\")",
+      "Bash(cmd /c \"dir /s /b \"\"C:\\\\Program Files\\\\Android\\\\Android Studio\\\\jbr\\\\bin\\\\keytool.exe\"\" 2>nul & dir /s /b \"\"C:\\\\Program Files\\\\Java\\\\*keytool.exe\"\" 2>nul & dir /s /b \"\"C:\\\\Program Files\\\\Eclipse Adoptium\\\\*keytool.exe\"\" 2>nul & dir /s /b \"\"C:\\\\Program Files\\\\Microsoft\\\\jdk*\\\\bin\\\\keytool.exe\"\" 2>nul\")",
+      "Bash(cmd /c \"dir /s /b \"\"C:\\\\Program Files\\\\Android\\\\*keytool.exe\"\" 2>nul\")",
+      "Bash(cmd /c \"dir /s /b \"\"C:\\\\Users\\\\Marcel.Lachmann\\\\AppData\\\\Local\\\\Programs\\\\*keytool.exe\"\" 2>nul\")",
+      "Bash(cmd /c \"flutter doctor -v 2>nul | findstr /i java\")"
     ]
   }
 }

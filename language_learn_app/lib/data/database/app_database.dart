@@ -151,6 +151,37 @@ class AppDatabase extends _$AppDatabase {
     );
   }
 
+  Future<int> deleteFlashcardsNotInSet(int lernSetId, List<int> keepIds) {
+    return (delete(flashcards)
+          ..where((f) =>
+              f.lernSetId.equals(lernSetId) & f.id.isNotIn(keepIds)))
+        .go();
+  }
+
+  Future<void> updateFlashcardFields(
+    int cardId, {
+    required String word,
+    required String translation,
+    required int position,
+    required bool resetProgress,
+  }) async {
+    final companion = resetProgress
+        ? FlashcardsCompanion(
+            word: Value(word),
+            translation: Value(translation),
+            position: Value(position),
+            boxLevel: const Value(1),
+            nextReview: const Value(null),
+          )
+        : FlashcardsCompanion(
+            word: Value(word),
+            translation: Value(translation),
+            position: Value(position),
+          );
+    await (update(flashcards)..where((f) => f.id.equals(cardId)))
+        .write(companion);
+  }
+
   Future<Map<int, int>> getBoxLevelCounts(int lernSetId) async {
     final result = <int, int>{};
     for (int i = 1; i <= 5; i++) {

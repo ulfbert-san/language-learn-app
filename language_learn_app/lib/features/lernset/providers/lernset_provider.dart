@@ -5,10 +5,23 @@ import '../../../data/repositories/flashcard_repository.dart';
 import '../../../data/repositories/lernset_repository.dart';
 
 class FlashcardInput {
+  final int? id;
   final String word;
   final String translation;
+  final String? originalWord;
+  final String? originalTranslation;
 
-  FlashcardInput({required this.word, required this.translation});
+  FlashcardInput({
+    this.id,
+    required this.word,
+    required this.translation,
+    this.originalWord,
+    this.originalTranslation,
+  });
+
+  bool get isContentChanged =>
+      id != null &&
+      (word != originalWord || translation != originalTranslation);
 }
 
 class LernSetEditorState {
@@ -83,9 +96,13 @@ class LernSetEditorNotifier extends StateNotifier<LernSetEditorState> {
 
   void updateFlashcard(int index, {String? word, String? translation}) {
     final cards = List<FlashcardInput>.from(state.flashcards);
+    final existing = cards[index];
     cards[index] = FlashcardInput(
-      word: word ?? cards[index].word,
-      translation: translation ?? cards[index].translation,
+      id: existing.id,
+      word: word ?? existing.word,
+      translation: translation ?? existing.translation,
+      originalWord: existing.originalWord,
+      originalTranslation: existing.originalTranslation,
     );
     state = state.copyWith(flashcards: cards);
   }
@@ -133,8 +150,13 @@ class LernSetEditorNotifier extends StateNotifier<LernSetEditorState> {
         flashcards: flashcards.isEmpty
             ? [FlashcardInput(word: '', translation: '')]
             : flashcards
-                .map((f) =>
-                    FlashcardInput(word: f.word, translation: f.translation))
+                .map((f) => FlashcardInput(
+                      id: f.id,
+                      word: f.word,
+                      translation: f.translation,
+                      originalWord: f.word,
+                      originalTranslation: f.translation,
+                    ))
                 .toList(),
         isLoading: false,
       );
@@ -175,8 +197,19 @@ class LernSetEditorNotifier extends StateNotifier<LernSetEditorState> {
           updatedAt: DateTime.now(),
         );
         await _lernSetRepository.updateLernSet(updated);
-        await _flashcardRepository.deleteAllByLernSet(existingId);
         lernSetId = existingId;
+
+        await _flashcardRepository.upsertFlashcards(
+          lernSetId,
+          validCards
+              .map((c) => (
+                    id: c.id,
+                    word: c.word,
+                    translation: c.translation,
+                    isContentChanged: c.isContentChanged,
+                  ))
+              .toList(),
+        );
       } else {
         lernSetId = await _lernSetRepository.createLernSet(
           name: state.name,
@@ -184,12 +217,12 @@ class LernSetEditorNotifier extends StateNotifier<LernSetEditorState> {
           folderId: state.folderId,
           language: state.language,
         );
-      }
 
-      await _flashcardRepository.createFlashcards(
-        lernSetId,
-        validCards.map((c) => (word: c.word, translation: c.translation)).toList(),
-      );
+        await _flashcardRepository.createFlashcards(
+          lernSetId,
+          validCards.map((c) => (word: c.word, translation: c.translation)).toList(),
+        );
+      }
 
       state = state.copyWith(isLoading: false);
       return lernSetId;
